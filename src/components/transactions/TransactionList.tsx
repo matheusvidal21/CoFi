@@ -1,0 +1,97 @@
+"use client"
+
+import { useEffect, useState } from "react"
+import { format } from "date-fns"
+import { ArrowDownCircle, ArrowUpCircle, Users, User } from "lucide-react"
+import { cn } from "@/lib/utils"
+import { Badge } from "@/components/ui/badge"
+
+interface Transaction {
+  id: string
+  amount: string
+  type: "INCOME" | "EXPENSE"
+  category: string
+  description: string
+  date: string
+  isShared: boolean
+  user: { name: string }
+}
+
+export default function TransactionList({ type = "all", refreshTrigger }: { type?: string, refreshTrigger?: number }) {
+  const [transactions, setTransactions] = useState<Transaction[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    setIsLoading(true)
+    fetch(`/api/transactions?type=${type}`)
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data)) {
+          setTransactions(data)
+        } else {
+          setTransactions([])
+        }
+      })
+      .catch(err => console.error("Failed to load transactions", err))
+      .finally(() => setIsLoading(false))
+  }, [type, refreshTrigger])
+
+  if (isLoading) {
+    return <div className="text-center py-10 text-muted-foreground">Carregando transações...</div>
+  }
+
+  if (transactions.length === 0) {
+    return <div className="text-center py-10 text-muted-foreground">Nenhuma transação encontrada.</div>
+  }
+
+  return (
+    <div className="space-y-4">
+      {transactions.map((transaction) => (
+        <div 
+          key={transaction.id} 
+          className="flex items-center justify-between p-4 rounded-xl border border-border/50 bg-card/50 hover:bg-card/80 transition-colors"
+        >
+          <div className="flex items-center gap-4">
+            <div className={cn(
+              "h-10 w-10 rounded-full flex items-center justify-center",
+              transaction.type === "INCOME" 
+                ? "bg-green-100 text-green-600 dark:bg-green-900/20" 
+                : "bg-red-100 text-red-600 dark:bg-red-900/20"
+            )}>
+              {transaction.type === "INCOME" ? <ArrowUpCircle className="h-6 w-6" /> : <ArrowDownCircle className="h-6 w-6" />}
+            </div>
+            <div>
+              <p className="font-medium">{transaction.description}</p>
+              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                <span>{format(new Date(transaction.date), "dd/MM/yyyy")}</span>
+                <span>•</span>
+                <span>{transaction.category}</span>
+                {transaction.isShared && (
+                  <>
+                    <span>•</span>
+                    <span className="flex items-center gap-1 text-primary">
+                      <Users className="h-3 w-3" />
+                      Compartilhado
+                    </span>
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
+          
+          <div className="text-right">
+            <p className={cn(
+              "font-bold",
+              transaction.type === "INCOME" ? "text-green-600" : "text-foreground"
+            )}>
+              {transaction.type === "INCOME" ? "+" : "-"} R$ {Number(transaction.amount).toFixed(2)}
+            </p>
+            <p className="text-xs text-muted-foreground">
+              {transaction.user.name}
+            </p>
+          </div>
+        </div>
+      ))}
+    </div>
+  )
+}

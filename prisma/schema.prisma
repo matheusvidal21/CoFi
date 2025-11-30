@@ -1,0 +1,157 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                String    @id @default(cuid())
+  email             String    @unique
+  name              String
+  password          String    // hashed
+  monthlyIncome     Decimal?  @db.Decimal(10, 2) // encrypted
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  
+  // Relations
+  transactions      Transaction[]
+  sharedGroupMember SharedGroupMember[]
+  sentInvites       Invite[]  @relation("SentInvites")
+  receivedInvites   Invite[]  @relation("ReceivedInvites")
+  categories        Category[]
+  notifications     Notification[]
+
+  @@map("users")
+}
+
+model SharedGroup {
+  id                String    @id @default(cuid())
+  name              String
+  status            GroupStatus @default(ACTIVE)
+  defaultDivisionType DivisionType @default(EQUAL)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  dissolvedAt       DateTime?
+  
+  // Relations
+  members           SharedGroupMember[]
+  transactions      Transaction[]
+}
+
+enum GroupStatus {
+  ACTIVE
+  DISSOLVED
+}
+
+enum DivisionType {
+  EQUAL           // 50/50
+  CUSTOM          // Custom percentages
+  INCOME_BASED    // Based on declared income
+}
+
+model SharedGroupMember {
+  id              String    @id @default(cuid())
+  userId          String
+  groupId         String
+  divisionPercent Decimal   @default(50) @db.Decimal(5, 2)
+  joinedAt        DateTime  @default(now())
+  
+  user            User      @relation(fields: [userId], references: [id])
+  group           SharedGroup @relation(fields: [groupId], references: [id])
+  
+  @@unique([userId, groupId])
+}
+
+model Transaction {
+  id              String    @id @default(cuid())
+  userId          String
+  groupId         String?   // null = personal transaction
+  amount          Decimal   @db.Decimal(10, 2)
+  type            TransactionType
+  category        String
+  description     String
+  date            DateTime
+  isShared        Boolean   @default(false)
+  isRecurring     Boolean   @default(false)
+  recurringFreq   RecurringFrequency?
+  divisionType    DivisionType?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  
+  // Relations
+  user            User      @relation(fields: [userId], references: [id])
+  group           SharedGroup? @relation(fields: [groupId], references: [id])
+  divisions       TransactionDivision[]
+}
+
+enum TransactionType {
+  INCOME
+  EXPENSE
+}
+
+enum RecurringFrequency {
+  WEEKLY
+  MONTHLY
+}
+
+model TransactionDivision {
+  id              String    @id @default(cuid())
+  transactionId   String
+  userId          String
+  amount          Decimal   @db.Decimal(10, 2)
+  percentage      Decimal   @db.Decimal(5, 2)
+  isPaid          Boolean   @default(false)
+  paidAt          DateTime?
+  
+  transaction     Transaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+  
+  @@unique([transactionId, userId])
+}
+
+model Category {
+  id              String    @id @default(cuid())
+  name            String
+  isDefault       Boolean   @default(false)
+  isShared        Boolean   @default(false)
+  userId          String?   // null = system category
+  createdAt       DateTime  @default(now())
+  
+  user            User?     @relation(fields: [userId], references: [id])
+}
+
+model Invite {
+  id              String    @id @default(cuid())
+  token           String    @unique
+  senderEmail     String
+  receiverEmail   String
+  senderId        String
+  receiverId      String?
+  status          InviteStatus @default(PENDING)
+  expiresAt       DateTime
+  createdAt       DateTime  @default(now())
+  respondedAt     DateTime?
+  
+  sender          User      @relation("SentInvites", fields: [senderId], references: [id])
+  receiver        User?     @relation("ReceivedInvites", fields: [receiverId], references: [id])
+}
+
+enum InviteStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  EXPIRED
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  title     String
+  message   String
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+  
+  user      User     @relation(fields: [userId], references: [id])
+}
