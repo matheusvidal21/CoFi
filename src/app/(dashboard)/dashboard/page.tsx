@@ -18,20 +18,22 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      <div className="glass-card p-6 rounded-xl">
-        <Tabs defaultValue="personal" className="w-full">
-          <div className="flex items-center justify-center mb-6">
-            <TabsList className="grid w-full max-w-[400px] grid-cols-2">
-              <TabsTrigger value="personal">Minhas Finanças</TabsTrigger>
-              <TabsTrigger value="shared">Finanças em Conjunto</TabsTrigger>
-            </TabsList>
+      <div className="space-y-6">
+        <Tabs defaultValue="personal" className="w-full space-y-6">
+          <div className="flex items-center justify-between">
+             <div className="bg-muted/20 p-1 rounded-xl inline-flex">
+              <TabsList className="grid w-full max-w-[400px] grid-cols-2 bg-transparent">
+                <TabsTrigger value="personal" className="rounded-lg data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm transition-all">Minhas Finanças</TabsTrigger>
+                <TabsTrigger value="shared" className="rounded-lg data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm transition-all">Finanças em Conjunto</TabsTrigger>
+              </TabsList>
+            </div>
           </div>
           
-          <TabsContent value="personal" className="space-y-4">
+          <TabsContent value="personal" className="space-y-4 outline-none mt-0">
             <PersonalView />
           </TabsContent>
           
-          <TabsContent value="shared" className="space-y-4">
+          <TabsContent value="shared" className="space-y-4 outline-none mt-0">
             <SharedView />
           </TabsContent>
         </Tabs>

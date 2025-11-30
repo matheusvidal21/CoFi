@@ -62,43 +62,52 @@ export default function SharedView() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-medium text-muted-foreground">
           {data.groupName}
         </h3>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-3">
-        <Card className="glass-card">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Receitas do Grupo</CardTitle>
-            <ArrowUpCircle className="h-4 w-4 text-green-500" />
+      <div className="grid gap-6 md:grid-cols-3">
+        <Card className="relative overflow-hidden border-l-4 border-l-green-500">
+          <div className="absolute top-0 right-0 p-3 opacity-10">
+            <ArrowUpCircle className="w-24 h-24 text-green-500" />
+          </div>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 z-10">
+            <CardTitle className="text-sm font-medium text-muted-foreground">Receitas do Grupo</CardTitle>
+            <ArrowUpCircle className="h-5 w-5 text-green-500" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-green-600">
+          <CardContent className="z-10">
+            <div className="text-3xl font-bold text-green-600">
               R$ {data.summary?.income.toFixed(2)}
             </div>
           </CardContent>
         </Card>
-        <Card className="glass-card">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Despesas do Grupo</CardTitle>
-            <ArrowDownCircle className="h-4 w-4 text-red-500" />
+        <Card className="relative overflow-hidden border-l-4 border-l-red-500">
+          <div className="absolute top-0 right-0 p-3 opacity-10">
+            <ArrowDownCircle className="w-24 h-24 text-red-500" />
+          </div>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 z-10">
+            <CardTitle className="text-sm font-medium text-muted-foreground">Despesas do Grupo</CardTitle>
+            <ArrowDownCircle className="h-5 w-5 text-red-500" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-red-600">
+          <CardContent className="z-10">
+            <div className="text-3xl font-bold text-red-600">
               R$ {data.summary?.expense.toFixed(2)}
             </div>
           </CardContent>
         </Card>
-        <Card className="glass-card">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Saldo do Grupo</CardTitle>
-            <Wallet className="h-4 w-4 text-primary" />
+        <Card className="relative overflow-hidden border-l-4 border-l-primary">
+          <div className="absolute top-0 right-0 p-3 opacity-10">
+            <Wallet className="w-24 h-24 text-primary" />
+          </div>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 z-10">
+            <CardTitle className="text-sm font-medium text-muted-foreground">Saldo do Grupo</CardTitle>
+            <Wallet className="h-5 w-5 text-primary" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
+          <CardContent className="z-10">
+            <div className={`text-3xl font-bold ${data.summary?.balance >= 0 ? 'text-primary' : 'text-red-600'}`}>
               R$ {data.summary?.balance.toFixed(2)}
             </div>
           </CardContent>
@@ -106,16 +115,19 @@ export default function SharedView() {
       </div>
 
       <div className="grid gap-6 md:grid-cols-2">
-        <Card className="glass-card">
+        <Card className="bg-gradient-to-br from-primary/5 to-secondary/5 border-primary/20 shadow-lg">
           <CardHeader>
-            <CardTitle>Pendências Financeiras</CardTitle>
+            <CardTitle className="text-primary flex items-center gap-2">
+              <Users className="w-5 h-5" />
+              Pendências Financeiras
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <PendingBalances balances={data.pendingBalances || []} onSettled={fetchData} />
           </CardContent>
         </Card>
 
-        <Card className="glass-card">
+        <Card>
           <CardHeader>
             <CardTitle>Gastos Compartilhados por Categoria</CardTitle>
           </CardHeader>
@@ -123,19 +135,52 @@ export default function SharedView() {
             <div className="h-[300px]">
               {data.categories && data.categories.length > 0 ? (
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={data.categories}>
-                    <XAxis dataKey="name" stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
-                    <YAxis stroke="#888888" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `R$${value}`} />
-                    <Tooltip 
-                      cursor={{ fill: 'transparent' }}
-                      contentStyle={{ backgroundColor: 'rgba(255, 255, 255, 0.8)', borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+                  <BarChart data={data.categories} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                    <XAxis 
+                      dataKey="name" 
+                      stroke="#718096" 
+                      fontSize={12} 
+                      tickLine={false} 
+                      axisLine={false}
+                      dy={10}
                     />
-                    <Bar dataKey="value" fill="currentColor" radius={[4, 4, 0, 0]} className="fill-primary" />
+                    <YAxis 
+                      stroke="#718096" 
+                      fontSize={12} 
+                      tickLine={false} 
+                      axisLine={false} 
+                      tickFormatter={(value) => `R$${value}`} 
+                    />
+                    <Tooltip 
+                      cursor={{ fill: 'rgba(102, 126, 234, 0.1)' }}
+                      contentStyle={{ 
+                        backgroundColor: 'rgba(255, 255, 255, 0.9)', 
+                        borderRadius: '12px', 
+                        border: 'none', 
+                        boxShadow: '0 8px 32px rgba(0,0,0,0.1)'
+                      }}
+                    />
+                    <Bar 
+                      dataKey="value" 
+                      fill="url(#sharedColorGradient)" 
+                      radius={[6, 6, 0, 0]} 
+                      className="fill-primary"
+                      barSize={40}
+                    />
+                    <defs>
+                      <linearGradient id="sharedColorGradient" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="#667eea" stopOpacity={1}/>
+                        <stop offset="100%" stopColor="#764ba2" stopOpacity={0.8}/>
+                      </linearGradient>
+                    </defs>
                   </BarChart>
                 </ResponsiveContainer>
               ) : (
-                <div className="h-full flex items-center justify-center text-muted-foreground">
-                  Sem dados de despesas este mês
+                <div className="h-full flex flex-col items-center justify-center text-muted-foreground gap-2">
+                   <div className="p-4 rounded-full bg-muted/50">
+                    <BarChart className="w-8 h-8 opacity-50" />
+                  </div>
+                  <p>Sem dados de despesas este mês</p>
                 </div>
               )}
             </div>
@@ -143,7 +188,7 @@ export default function SharedView() {
         </Card>
       </div>
 
-      <Card className="glass-card">
+      <Card>
         <CardHeader>
           <CardTitle>Transações Recentes do Grupo</CardTitle>
         </CardHeader>

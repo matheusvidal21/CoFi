@@ -24,7 +24,7 @@ export default async function DashboardLayout({
   }
 
   return (
-    <div className="min-h-screen bg-background flex flex-col md:flex-row">
+    <div className="min-h-screen flex flex-col md:flex-row">
       {/* Mobile Navigation (Bottom) */}
       <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 glass border-t border-border/50 flex justify-around p-4">
         <Link href="/dashboard" className="flex flex-col items-center text-xs gap-1 text-muted-foreground hover:text-primary">
