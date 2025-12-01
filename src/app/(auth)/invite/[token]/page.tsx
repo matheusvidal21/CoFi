@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import { useParams, useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import { Loader2, Check, X } from "lucide-react"
+import { Loader2, X } from "lucide-react"
 import { toast } from "sonner"
 import Link from "next/link"
 

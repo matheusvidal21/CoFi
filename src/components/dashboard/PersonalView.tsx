@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { ArrowDownCircle, ArrowUpCircle, Wallet } from "lucide-react"
+import { ArrowDownCircle, Wallet, TrendingUp, TrendingDown } from "lucide-react"
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip } from "recharts"
 import RecentTransactions from "./RecentTransactions"
 
@@ -14,6 +14,7 @@ interface DashboardData {
   }
   monthlyIncome?: number
   categories: { name: string; value: number }[]
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   recentTransactions?: any[]
 }
 
@@ -29,56 +30,72 @@ export default function PersonalView() {
       .finally(() => setIsLoading(false))
   }, [])
 
-  if (isLoading) return <div className="py-10 text-center">Carregando...</div>
-  if (!data) return <div className="py-10 text-center">Erro ao carregar dados</div>
+  if (isLoading) return (
+    <div className="py-10 text-center">
+      <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
+      <p className="mt-2 text-muted-foreground">Carregando...</p>
+    </div>
+  )
+  if (!data) return <div className="py-10 text-center text-muted-foreground">Erro ao carregar dados</div>
 
   return (
     <div className="space-y-6">
-      <div className="grid gap-4 md:grid-cols-3">
-        <Card className="glass-card">
+      <div className="grid gap-5 md:grid-cols-3">
+        <Card className="glass-card group hover:shadow-[var(--shadow-hover)] hover:-translate-y-1 cursor-default overflow-hidden relative">
+          <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-transparent pointer-events-none"></div>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Receitas (Mês)</CardTitle>
-            <ArrowUpCircle className="h-4 w-4 text-green-500" />
+            <CardTitle className="text-sm font-medium text-muted-foreground">Entradas Totais</CardTitle>
+            <div className="h-10 w-10 rounded-xl bg-emerald-500/10 flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
+              <TrendingUp className="h-5 w-5 text-emerald-500" />
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-600">
-              R$ {data.summary.income.toFixed(2)}
+            <div className="text-3xl font-bold text-emerald-600 dark:text-emerald-400 tracking-tight">
+              R$ {data.summary.income.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
             </div>
             {data.monthlyIncome && data.monthlyIncome > 0 && (
-              <div className="mt-2 text-xs text-muted-foreground space-y-1">
-                <div className="flex justify-between">
+              <div className="mt-3 pt-3 border-t border-border/30 text-xs text-muted-foreground space-y-1.5">
+                <div className="flex justify-between items-center">
                   <span>Renda fixa:</span>
-                  <span className="font-medium">R$ {data.monthlyIncome.toFixed(2)}</span>
+                  <span className="font-semibold text-foreground">R$ {data.monthlyIncome.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
                 </div>
                 {(data.summary.income - data.monthlyIncome) > 0 && (
-                  <div className="flex justify-between">
+                  <div className="flex justify-between items-center">
                     <span>Receitas variáveis:</span>
-                    <span className="font-medium">R$ {(data.summary.income - data.monthlyIncome).toFixed(2)}</span>
+                    <span className="font-semibold text-foreground">R$ {(data.summary.income - data.monthlyIncome).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
                   </div>
                 )}
               </div>
             )}
           </CardContent>
         </Card>
-        <Card className="glass-card">
+
+        <Card className="glass-card group hover:shadow-[var(--shadow-hover)] hover:-translate-y-1 cursor-default overflow-hidden relative">
+          <div className="absolute inset-0 bg-gradient-to-br from-rose-500/5 to-transparent pointer-events-none"></div>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Despesas (Mês)</CardTitle>
-            <ArrowDownCircle className="h-4 w-4 text-red-500" />
+            <CardTitle className="text-sm font-medium text-muted-foreground">Gastos Totais</CardTitle>
+            <div className="h-10 w-10 rounded-xl bg-rose-500/10 flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
+              <TrendingDown className="h-5 w-5 text-rose-500" />
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-red-600">
-              R$ {data.summary.expense.toFixed(2)}
+            <div className="text-3xl font-bold text-rose-600 dark:text-rose-400 tracking-tight">
+              R$ {data.summary.expense.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
             </div>
           </CardContent>
         </Card>
-        <Card className="glass-card">
+
+        <Card className="glass-card group hover:shadow-[var(--shadow-hover)] hover:-translate-y-1 cursor-default overflow-hidden relative">
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent pointer-events-none"></div>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Saldo (Mês)</CardTitle>
-            <Wallet className="h-4 w-4 text-primary" />
+            <CardTitle className="text-sm font-medium text-muted-foreground">Saldo Atual</CardTitle>
+            <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
+              <Wallet className="h-5 w-5 text-primary" />
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
-              R$ {data.summary.balance.toFixed(2)}
+            <div className={`text-3xl font-bold tracking-tight ${data.summary.balance >= 0 ? 'text-foreground' : 'text-rose-600 dark:text-rose-400'}`}>
+              R$ {data.summary.balance.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
             </div>
           </CardContent>
         </Card>
@@ -86,25 +103,60 @@ export default function PersonalView() {
 
       <Card className="glass-card">
         <CardHeader>
-          <CardTitle>Gastos por Categoria</CardTitle>
+          <CardTitle className="text-lg font-semibold">Gastos por Categoria</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="h-[300px]">
             {data.categories.length > 0 ? (
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={data.categories}>
-                  <XAxis dataKey="name" stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
-                  <YAxis stroke="#888888" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `R$${value}`} />
-                  <Tooltip 
-                    cursor={{ fill: 'transparent' }}
-                    contentStyle={{ backgroundColor: 'rgba(255, 255, 255, 0.8)', borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+                <BarChart data={data.categories} barCategoryGap="20%">
+                  <XAxis 
+                    dataKey="name" 
+                    stroke="#94a3b8" 
+                    fontSize={12} 
+                    tickLine={false} 
+                    axisLine={false}
+                    tick={{ fill: '#64748b' }}
                   />
-                  <Bar dataKey="value" fill="currentColor" radius={[4, 4, 0, 0]} className="fill-primary" />
+                  <YAxis 
+                    stroke="#94a3b8" 
+                    fontSize={12} 
+                    tickLine={false} 
+                    axisLine={false} 
+                    tickFormatter={(value) => `R$${value}`}
+                    tick={{ fill: '#64748b' }}
+                  />
+                  <Tooltip 
+                    cursor={{ fill: 'rgba(102, 126, 234, 0.05)', radius: 8 }}
+                    contentStyle={{ 
+                      backgroundColor: 'rgba(255, 255, 255, 0.95)', 
+                      borderRadius: '12px', 
+                      border: '1px solid rgba(102, 126, 234, 0.2)', 
+                      boxShadow: '0 8px 24px rgba(45, 55, 72, 0.12)',
+                      padding: '12px 16px'
+                    }}
+                    labelStyle={{ color: '#2d3748', fontWeight: 600, marginBottom: '4px' }}
+                    formatter={(value: number) => [`R$ ${value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`, 'Valor']}
+                  />
+                  <Bar 
+                    dataKey="value" 
+                    fill="url(#colorGradient)" 
+                    radius={[8, 8, 0, 0]}
+                  />
+                  <defs>
+                    <linearGradient id="colorGradient" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#667eea" />
+                      <stop offset="100%" stopColor="#764ba2" />
+                    </linearGradient>
+                  </defs>
                 </BarChart>
               </ResponsiveContainer>
             ) : (
-              <div className="h-full flex items-center justify-center text-muted-foreground">
-                Sem dados de despesas este mês
+              <div className="h-full flex flex-col items-center justify-center text-muted-foreground gap-3">
+                <div className="h-12 w-12 rounded-full bg-muted/50 flex items-center justify-center">
+                  <ArrowDownCircle className="h-6 w-6 text-muted-foreground/50" />
+                </div>
+                <p>Sem dados de despesas este mês</p>
               </div>
             )}
           </div>
@@ -112,8 +164,8 @@ export default function PersonalView() {
       </Card>
 
       <Card className="glass-card">
-        <CardHeader>
-          <CardTitle>Transações Recentes</CardTitle>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <CardTitle className="text-lg font-semibold">Transações Recentes</CardTitle>
         </CardHeader>
         <CardContent>
           <RecentTransactions transactions={data.recentTransactions || []} />

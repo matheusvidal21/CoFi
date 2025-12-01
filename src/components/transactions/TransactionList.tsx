@@ -4,7 +4,6 @@ import { useEffect, useState } from "react"
 import { format } from "date-fns"
 import { ArrowDownCircle, ArrowUpCircle, Users, User } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { Badge } from "@/components/ui/badge"
 
 interface Transaction {
   id: string
@@ -23,17 +22,27 @@ export default function TransactionList({ type = "all", refreshTrigger }: { type
 
   useEffect(() => {
     setIsLoading(true)
-    fetch(`/api/transactions?type=${type}`)
-      .then(res => res.json())
-      .then(data => {
+  }, [type, refreshTrigger])
+
+  useEffect(() => {
+    const fetchTransactions = async () => {
+      try {
+        const res = await fetch(`/api/transactions?type=${type}`)
+        const data = await res.json()
+        
         if (Array.isArray(data)) {
           setTransactions(data)
         } else {
           setTransactions([])
         }
-      })
-      .catch(err => console.error("Failed to load transactions", err))
-      .finally(() => setIsLoading(false))
+      } catch (err) {
+        console.error("Failed to load transactions", err)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchTransactions()
   }, [type, refreshTrigger])
 
   if (isLoading) {
